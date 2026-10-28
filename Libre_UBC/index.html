@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Making a map!</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+</head>
+<body>
+ <div id="mapid" style="width: 600px; height: 400px;"></div>
+
+  <script type="module">
+     import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+    const map = new maplibregl.Map({
+      container: 'mapid',                  // the id of the div above
+      center: [-123.239029, 49.266812],    // [longitude, latitude]
+      zoom: 12.8,
+      style: 'https://tiles.openfreemap.org/styles/dark'   // an empty style: no basemap yet
+    });
+    window.map = map;
+	
+	
+	
+    const url = 'https://raw.githubusercontent.com/UBCGeodata/ubc-geospatial-opendata/master/ubcv/locations/geojson/ubcv_building_entraces.geojson';
+
+
+   
+	//POWER_DOOR
+	
+const EntranceColour = {
+     'circle-radius': ['interpolate', ['linear'], ['zoom'],
+ 12, 1, 17, 7, 19, 9],
+
+      
+      
+      'circle-color': ['match', ['get', 'POWER_DOOR'],
+                       1, '#ebfa16',
+                       0, '#ff0004',
+                       '#999999'],
+      'circle-opacity': 0.7
+    };
+
+    
+ 
+    map.on('load', function () {
+      map.addSource('Entrances', {
+        type: 'geojson',
+        data: url,
+        attribution: 'UBC Campus Entrances'
+      });
+
+      
+      map.addLayer({
+        id: 'Entrance-circles',
+        type: 'circle',
+        source: 'Entrances',
+		paint: EntranceColour
+      });
+    });	
+	
+	function onEachEntrance(e) {
+ const Entrance = e.features[0].properties;
+ if (Entrance.POWER_DOOR==1) {
+ const popup = new maplibregl.Popup();
+ popup.setLngLat(e.lngLat);
+ popup.setText("Power Door");
+ popup.addTo(map);
+ } else {
+ const popup2 = new maplibregl.Popup();
+ popup2.setLngLat(e.lngLat);
+ popup2.setText("Unpowered Door");
+ popup2.addTo(map);
+}
+}
+map.on('click', 'Entrance-circles', onEachEntrance);
+	
+	
+	
+  </script>
+
+</body>
+</html>
